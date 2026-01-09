@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Indira Bal Vidya Mandir Inter College</title>
+    <meta name="description" content="Affiliated with UP State Board, Loni, Ghaziabad. Excellence in Science, Commerce, and Arts.">
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+
+    <!-- Supabase & Cropper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #003366;
+            --accent: #FFD700;
+            --secondary: #27AE60;
+            --bg-light: #F8F9FA;
+            --text-dark: #333333;
+            --white: #FFFFFF;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.12);
+            --radius: 12px;
+            --safe-area-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* --- Reset & Base --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        html { scroll-behavior: smooth; font-size: 16px; }
+        body { font-family: 'Roboto', sans-serif; color: var(--text-dark); background: var(--white); overflow-x: hidden; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; color: var(--primary); }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        img { max-width: 100%; display: block; object-fit: cover; }
+        button { cursor: pointer; border: none; font-family: 'Poppins', sans-serif; }
+
+        /* --- Utilities --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .section-padding { padding: 80px 0; }
+        .text-center { text-align: center; }
+        .hidden { display: none !important; }
+        .flex-center { display: flex; align-items: center; justify-content: center; }
+
+        /* --- UI Components --- */
+        .btn {
+            display: inline-block; padding: 12px 32px; border-radius: 50px; font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden;
+            font-size: 1rem; letter-spacing: 0.5px;
+        }
+        .btn::after {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0;
+            background: rgba(255,255,255,0.3); border-radius: 50%; transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .btn:active::after { width: 300px; height: 300px; }
+        .btn:active { transform: scale(0.96); }
+        .btn-primary { background: var(--primary); color: var(--white); }
+        .btn-accent { background: var(--accent); color: var(--primary); }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        
+        .section-title { font-size: 2.5rem; margin-bottom: 1rem; font-weight: 700; position: relative; display: inline-block; }
+        .section-title::after {
+            content: ''; display: block; width: 60px; height: 4px; background: var(--accent);
+            margin: 10px auto 0; border-radius: 2px;
+        }
+
+        /* --- Loading Spinner --- */
+        #loader {
+            position: fixed; inset: 0; background: var(--white); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid var(--bg-light);
+            border-top: 5px solid var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- Header & Nav --- */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm); transition: all 0.3s;
+        }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; height: 70px; }
+        .logo-area { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+        .logo-img { height: 45px; width: auto; border-radius: 4px; }
+        .school-name-nav { font-weight: 700; font-size: 1.1rem; color: var(--primary); line-height: 1.2; }
+        
+        .desktop-nav { display: none; gap: 25px; }
+        .desktop-nav a { font-weight: 500; font-size: 0.95rem; transition: color 0.3s; }
+        .desktop-nav a:hover, .desktop-nav a.active { color: var(--secondary); }
+
+        .hamburger { font-size: 1.5rem; color: var(--primary); cursor: pointer; padding: 10px; }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed; top: 0; right: -100%; width: 80%; height: 100vh;
+            background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px);
+            z-index: 1001; transition: right 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+            padding: 80px 30px; display: flex; flex-direction: column; gap: 20px;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+        }
+        .mobile-menu.open { right: 0; }
+        .mobile-menu a { font-size: 1.2rem; font-weight: 600; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .mobile-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .mobile-overlay.active { opacity: 1; pointer-events: auto; }
+
+        /* --- Hero Section --- */
+        .hero {
+            height: 90vh; min-height: 600px; position: relative;
+            display: flex; align-items: center; justify-content: center;
+            background-size: cover; background-position: center;
+            color: var(--white); text-align: center; margin-top: 70px;
+        }
+        .hero-overlay {
+            position: absolute; inset: 0; background: linear-gradient(rgba(0,51,102,0.8), rgba(0,51,102,0.6));
+        }
+        .hero-content { position: relative; z-index: 2; max-width: 800px; padding: 20px; animation: fadeInUp 1s ease; }
+        .hero h1 { font-size: clamp(2rem, 5vw, 4rem); color: var(--accent); margin-bottom: 15px; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .hero p { font-size: clamp(1rem, 2vw, 1.5rem); margin-bottom: 30px; font-weight: 300; }
+
+        /* --- Cards (Generic) --- */
+        .card-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;
+        }
+        .card {
+            background: var(--white); border-radius: var(--radius); overflow: hidden;
+            box-shadow: var(--shadow-sm); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative; height: 100%; display: flex; flex-direction: column;
+        }
+        .card:hover { transform: translateY(-8px); box-shadow: var(--shadow-md); }
+        .card-img { width: 100%; height: 200px; object-fit: cover; }
+        .card-body { padding: 25px; flex-grow: 1; }
+        .card-title { font-size: 1.25rem; margin-bottom: 10px; color: var(--primary); font-weight: 700; }
+        .card-text { font-size: 0.95rem; color: #555; line-height: 1.6; }
+        .card-icon { font-size: 2.5rem; color: var(--secondary); margin-bottom: 15px; }
+        .date-badge {
+            background: var(--accent); color: var(--primary); padding: 5px 12px;
+            border-radius: 4px; font-weight: 700; font-size: 0.85rem; display: inline-block; margin-bottom: 10px;
+        }
+
+        /* --- Gallery --- */
+        .gallery-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;
+        }
+        .gallery-item {
+            position: relative; border-radius: var(--radius); overflow: hidden; aspect-ratio: 1/1; cursor: pointer;
+        }
+        .gallery-item img { width: 100%; height: 100%; transition: transform 0.5s; }
+        .gallery-item:hover img { transform: scale(1.1); }
+        .gallery-caption {
+            position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .gallery-item:hover .gallery-caption { opacity: 1; }
+
+        /* --- Forms --- */
+        .form-group { margin-bottom: 20px; }
+        .form-control {
+            width: 100%; padding: 14px 20px; border: 1px solid #ddd; border-radius: 8px;
+            font-family: inherit; font-size: 1rem; transition: border-color 0.3s;
+        }
+        .form-control:focus { border-color: var(--primary); }
+        textarea.form-control { resize: vertical; min-height: 120px; }
+
+        /* --- Footer --- */
+        footer { background: var(--primary); color: var(--white); padding: 60px 0 30px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px; }
+        .footer-heading { color: var(--accent); margin-bottom: 20px; font-size: 1.2rem; }
+        .footer-links li { margin-bottom: 10px; }
+        .footer-links a:hover { color: var(--accent); }
+        .social-links a { font-size: 1.5rem; margin-right: 15px; color: white; transition: color 0.3s; }
+        .social-links a:hover { color: var(--accent); }
+
+        /* --- Admin Panel --- */
+        .admin-panel {
+            position: fixed; inset: 0; z-index: 2000; display: none;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
+        }
+        .admin-panel.active { display: flex; }
+        .admin-content {
+            background: #f4f6f9; width: 100%; max-width: 1000px; margin: 0 auto; height: 100%;
+            display: flex; box-shadow: 0 0 50px rgba(0,0,0,0.3); overflow: hidden;
+        }
+        .admin-sidebar {
+            width: 250px; background: var(--primary); color: white; padding: 20px; display: flex; flex-direction: column;
+            overflow-y: auto; flex-shrink: 0;
+        }
+        .admin-sidebar h3 { color: var(--accent); margin-bottom: 30px; font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        .admin-nav-item {
+            padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.2s;
+        }
+        .admin-nav-item:hover, .admin-nav-item.active { background: rgba(255,255,255,0.1); color: var(--accent); }
+        .admin-main { flex-grow: 1; padding: 30px; overflow-y: auto; position: relative; }
+        .admin-section { display: none; animation: fadeIn 0.3s; }
+        .admin-section.active { display: block; }
+        .data-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-sm); }
+        .data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .data-table th { background: #eee; font-weight: 600; color: #555; }
+        .action-btn { padding: 6px 12px; font-size: 0.8rem; border-radius: 4px; margin-right: 5px; cursor: pointer; }
+
+        /* --- Modals & Toasts --- */
+        dialog {
+            border: none; border-radius: 16px; padding: 0; width: 90%; max-width: 500px;
+            box-shadow: var(--shadow-md); margin: auto;
+        }
+        dialog::backdrop { background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+        .modal-header { padding: 20px; background: var(--bg-light); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .modal-body { padding: 25px; max-height: 70vh; overflow-y: auto; }
+        .modal-footer { padding: 15px 25px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; }
+        
+        .toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            background: #333; color: white; padding: 12px 24px; border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 10px;
+            animation: slideUp 0.3s ease-out; font-size: 0.9rem;
+        }
+        .toast.success { background: var(--secondary); }
+        .toast.error { background: #e74c3c; }
+
+        /* --- Cropper Modal --- */
+        #cropModal { max-width: 90vw; }
+        .crop-container { height: 60vh; background: #333; }
+        .crop-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; justify-content: center; }
+
+        /* Animations */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Responsive */
+        @media(min-width: 768px) {
+            .desktop-nav { display: flex; }
+            .hamburger { display: none; }
+            .admin-sidebar { display: flex; }
+            .admin-content { height: 90vh; border-radius: 12px; }
+            .admin-panel { padding: 40px; }
+        }
+        @media(max-width: 768px) {
+            .admin-content { flex-direction: column; height: 100%; border-radius: 0; }
+            .admin-sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 10px; white-space: nowrap; }
+            .admin-nav-item { margin-bottom: 0; margin-right: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Spinner -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top:15px; color:var(--primary); font-weight:600;">Loading School Data...</p>
+    </div>
+
+    <!-- Navigation -->
+    <header>
+        <div class="container nav-container">
+            <div class="logo-area" id="logoTrigger">
+                <img src="https://placehold.co/100x100?text=Logo" alt="School Logo" class="logo-img" id="navLogo">
+                <div class="school-name-nav" id="navSchoolName">Indira Bal Vidya<br>Mandir</div>
+            </div>
+            <nav class="desktop-nav">
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#academics">Academics</a>
+                <a href="#facilities">Facilities</a>
+                <a href="#gallery">Gallery</a>
+                <a href="#events">Events</a>
+                <a href="#admissions">Admissions</a>
+                <a href="#contact" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Contact</a>
+            </nav>
+            <div class="hamburger" id="hamburgerBtn"><i class="fas fa-bars"></i></div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#home" onclick="closeMenu()">Home</a>
+        <a href="#about" onclick="closeMenu()">About</a>
+        <a href="#academics" onclick="closeMenu()">Academics</a>
+        <a href="#facilities" onclick="closeMenu()">Facilities</a>
+        <a href="#gallery" onclick="closeMenu()">Gallery</a>
+        <a href="#events" onclick="closeMenu()">Events</a>
+        <a href="#admissions" onclick="closeMenu()">Admissions</a>
+        <a href="#contact" onclick="closeMenu()">Contact Us</a>
+    </div>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 id="heroTitle">Indira Bal Vidya Mandir Inter College</h1>
+                <p id="heroTagline">Empowering Future Leaders with Excellence</p>
+                <a href="#about" class="btn btn-accent">Explore Our School</a>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section-padding">
+            <div class="container">
+                <div class="text-center">
+                    <h2 class="section-title">About Us</h2>
+                    <p style="max-width: 800px; margin: 0 auto; line-height: 1.8;" id="aboutText">
+                        Loading about content...
+                    </p>
+                </div>
+                <div class="row" style="margin-top: 50px; display: flex; flex-wrap: wrap; gap: 30px; justify-content: center;">
+                    <div class="card" style="padding: 30px; max-width: 500px; border-left: 5px solid var(--primary);">
+                        <h3 style="margin-bottom: 15px;">Principal's Message</h3>
+                        <p id="principalMsg">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Academics Section -->
+        <section id="academics" class="section-padding" style="background: var(--bg-light);">
+            <div class="container">
+                <h2 class="section-title text-center" style="display:block;">Academic Streams</h2>
+                <div class="card-grid" id="streamsGrid" style="margin-top: 40px;">
+                    <!-- Dynamic Streams -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Facilities Section -->
+        <section id="facilities" class="section-padding">
+            <div class="container">
+                <h2 class="section-title text-center" style="display:block;">Our Facilities</h2>
+                <div class="card-grid" id="facilitiesGrid" style="margin-top: 40px;">
+                    <!-- Dynamic Facilities -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="section-padding" style="background: var(--bg-light);">
+            <div class="container">
+                <h2 class="section-title text-center" style="display:block;">Campus Gallery</h2>
+                <div class="gallery-grid" id="galleryGrid" style="margin-top: 40px;">
+                    <!-- Dynamic Images -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Events Section -->
+        <section id="events" class="section-padding">
+            <div class="container">
+                <h2 class="section-title text-center" style="display:block;">News & Events</h2>
+                <div class="card-grid" id="eventsGrid" style="margin-top: 40px;">
+                    <!-- Dynamic Events -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Admissions Section -->
+        <section id="admissions" class="section-padding" style="background: var(--primary); color: white;">
+            <div class="container text-center">
+                <h2 style="color: var(--accent); margin-bottom: 20px;">Admissions Open</h2>
+                <p id="admissionsText" style="max-width: 700px; margin: 0 auto 30px; font-size: 1.1rem;">
+                    We are accepting applications for the new academic session.
+                </p>
+                <a href="#contact" class="btn btn-accent">Apply Now</a>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section-padding">
+            <div class="container">
+                <h2 class="section-title text-center" style="display:block;">Contact Us</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 40px;">
+                    <div>
+                        <h3 style="margin-bottom: 20px;">Get In Touch</h3>
+                        <p style="margin-bottom: 10px;"><i class="fas fa-map-marker-alt" style="color:var(--primary); width:25px;"></i> <span id="contactAddress">...</span></p>
+                        <p style="margin-bottom: 10px;"><i class="fas fa-phone" style="color:var(--primary); width:25px;"></i> <span id="contactPhone">...</span></p>
+                        <p style="margin-bottom: 20px;"><i class="fas fa-envelope" style="color:var(--primary); width:25px;"></i> <span id="contactEmail">...</span></p>
+                        <div id="mapContainer" style="width: 100%; height: 250px; background: #eee; border-radius: var(--radius);">
+                            <!-- Map Iframe will be injected here -->
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 20px;">Send Enquiry</h3>
+                        <form id="enquiryForm">
+                            <div class="form-group"><input type="text" class="form-control" placeholder="Student Name" required id="enqName"></div>
+                            <div class="form-group"><input type="tel" class="form-control" placeholder="Phone Number" required id="enqPhone"></div>
+                            <div class="form-group"><input type="text" class="form-control" placeholder="Class Applying For" required id="enqClass"></div>
+                            <div class="form-group"><textarea class="form-control" placeholder="Message" id="enqMsg"></textarea></div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Enquiry</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h4 class="footer-heading" id="footerSchoolName">IBVM Inter College</h4>
+                    <p style="opacity: 0.8;" id="footerTagline">Empowering Future Leaders</p>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#admissions">Admissions</a></li>
+                        <li><a href="#gallery">Gallery</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Connect</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; font-size: 0.9rem; opacity: 0.7;">
+                &copy; <span id="yearSpan"></span> Indira Bal Vidya Mandir. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- --- ADMIN PANEL --- -->
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-content">
+            <nav class="admin-sidebar">
+                <h3>Admin Panel</h3>
+                <div class="admin-nav-item active" onclick="showAdminSection('settings')">Site Settings</div>
+                <div class="admin-nav-item" onclick="showAdminSection('content')">Text Content</div>
+                <div class="admin-nav-item" onclick="showAdminSection('academics_admin')">Academics</div>
+                <div class="admin-nav-item" onclick="showAdminSection('facilities_admin')">Facilities</div>
+                <div class="admin-nav-item" onclick="showAdminSection('events_admin')">Events</div>
+                <div class="admin-nav-item" onclick="showAdminSection('gallery_admin')">Gallery</div>
+                <div class="admin-nav-item" onclick="showAdminSection('enquiries_admin')">Enquiries</div>
+                <div style="margin-top: auto; padding-top:20px;">
+                    <button class="btn btn-secondary" style="width:100%;" onclick="logout()">Logout</button>
+                </div>
+            </nav>
+            <main class="admin-main">
+                <button class="btn btn-secondary" onclick="closeAdminPanel()" style="position:absolute; top:10px; right:10px;"><i class="fas fa-times"></i></button>
+                
+                <!-- Settings Section -->
+                <div id="settings" class="admin-section active">
+                    <h2>Site Settings</h2>
+                    <form id="settingsForm">
+                        <div class="form-group">
+                            <label>School Name</label>
+                            <input type="text" class="form-control" id="setSchoolName">
+                        </div>
+                        <div class="form-group">
+                            <label>Tagline</label>
+                            <input type="text" class="form-control" id="setTagline">
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input type="text" class="form-control" id="setAddress">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="text" class="form-control" id="setPhone">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" class="form-control" id="setEmail">
+                        </div>
+                        <div class="form-group">
+                            <label>Map Embed URL (src only) <small style="color:red; font-size:0.8rem;">(Paste Embed Link, NOT Share link)</small></label>
+                            <input type="text" class="form-control" id="setMap" placeholder="https://www.google.com/maps/embed?pb=...">
+                        </div>
+                        <div class="form-group">
+                            <label>Logo</label><br>
+                            <button type="button" class="btn btn-secondary" onclick="triggerUpload('logo', 1)">Upload Logo</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Hero Background</label><br>
+                            <button type="button" class="btn btn-secondary" onclick="triggerUpload('hero', 16/9)">Upload Hero Bg</button>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                    </form>
+                </div>
+
+                <!-- Content Section -->
+                <div id="content" class="admin-section">
+                    <h2>Text Content</h2>
+                    <form id="contentForm">
+                        <div class="form-group">
+                            <label>About Us Text</label>
+                            <textarea class="form-control" id="setContentAbout"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Principal's Message</label>
+                            <textarea class="form-control" id="setContentPrincipal"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Admissions Info</label>
+                            <textarea class="form-control" id="setContentAdmission"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Content</button>
+                    </form>
+                </div>
+
+                <!-- Generic Sections (Events, Facilities, etc handled via JS) -->
+                <div id="academics_admin" class="admin-section">
+                    <h2>Manage Streams</h2>
+                    <button class="btn btn-accent" onclick="addItem('streams')">+ Add Stream</button>
+                    <div id="adminStreamsList" style="margin-top:20px;"></div>
+                </div>
+
+                <div id="facilities_admin" class="admin-section">
+                    <h2>Manage Facilities</h2>
+                    <button class="btn btn-accent" onclick="addItem('facilities')">+ Add Facility</button>
+                    <div id="adminFacilitiesList" style="margin-top:20px;"></div>
+                </div>
+
+                <div id="events_admin" class="admin-section">
+                    <h2>Manage Events</h2>
+                    <button class="btn btn-accent" onclick="addItem('events')">+ Add Event</button>
+                    <div id="adminEventsList" style="margin-top:20px;"></div>
+                </div>
+
+                <div id="gallery_admin" class="admin-section">
+                    <h2>Manage Gallery</h2>
+                    <button class="btn btn-accent" onclick="triggerUpload('gallery', NaN)">+ Upload Image</button>
+                    <div id="adminGalleryList" class="gallery-grid" style="margin-top:20px;"></div>
+                </div>
+
+                <div id="enquiries_admin" class="admin-section">
+                    <h2>Enquiries</h2>
+                    <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+                    <div style="overflow-x:auto; margin-top:20px;">
+                        <table class="data-table" id="enquiryTable">
+                            <thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Class</th><th>Msg</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Login Modal -->
+    <dialog id="loginModal">
+        <div class="modal-header"><h3>Admin Login</h3><button onclick="closeModal('loginModal')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-group"><input type="email" id="loginEmail" class="form-control" placeholder="Email"></div>
+            <div class="form-group"><input type="password" id="loginPass" class="form-control" placeholder="Password"></div>
+        </div>
+        <div class="modal-footer"><button class="btn btn-primary" onclick="login()">Login</button></div>
+    </dialog>
+
+    <!-- Crop Modal -->
+    <dialog id="cropModal">
+        <div class="modal-header"><h3>Crop Image</h3><button onclick="closeModal('cropModal')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body" style="background: #222; padding: 0;">
+            <div class="crop-container">
+                <img id="cropImageSrc" style="max-width: 100%;">
+            </div>
+            <div class="crop-controls" style="padding: 10px; background: #fff;">
+                <button class="action-btn" onclick="cropper.setAspectRatio(1)">1:1</button>
+                <button class="action-btn" onclick="cropper.setAspectRatio(16/9)">16:9</button>
+                <button class="action-btn" onclick="cropper.setAspectRatio(4/3)">4:3</button>
+                <button class="action-btn" onclick="cropper.setAspectRatio(NaN)">Free</button>
+                <button class="action-btn" onclick="cropper.rotate(90)"><i class="fas fa-redo"></i></button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('cropModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveCrop()">Upload</button>
+        </div>
+    </dialog>
+
+    <!-- Edit Item Modal (Generic) -->
+    <dialog id="editModal">
+        <div class="modal-header"><h3 id="editModalTitle">Edit Item</h3><button onclick="closeModal('editModal')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body" id="editModalBody"></div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('editModal')">Cancel</button>
+            <button class="btn btn-primary" id="saveEditBtn">Save</button>
+        </div>
+    </dialog>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <input type="file" id="fileInput" hidden accept="image/*">
+
+    <script>
+        // --- CONFIGURATION ---
+        const supabaseUrl = 'https://ldanguemsiezrclvwbft.supabase.co';
+        const supabaseAnonKey = 'sb_publishable_ELJsYqBG-Lph1H-p9gaU0w_q4glKwRW'; // Use the correct key from your project if this placeholder fails
+        
+        // Changed variable name from 'supabase' to 'sb' to avoid collision with CDN's global 'supabase'
+        const sb = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        
+        // State
+        let state = {
+            settings: {},
+            content: {},
+            facilities: [],
+            streams: [],
+            events: [],
+            gallery: [],
+            enquiries: [],
+            user: null
+        };
+        
+        let cropper = null;
+        let currentUploadType = '';
+        let currentEditingId = null;
+
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('yearSpan').innerText = new Date().getFullYear();
+            
+            // Mobile Menu Logic
+            document.getElementById('hamburgerBtn').addEventListener('click', () => {
+                document.getElementById('mobileMenu').classList.add('open');
+                document.getElementById('mobileOverlay').classList.add('active');
+            });
+            const closeMenu = () => {
+                document.getElementById('mobileMenu').classList.remove('open');
+                document.getElementById('mobileOverlay').classList.remove('active');
+            };
+            document.getElementById('mobileOverlay').addEventListener('click', closeMenu);
+            window.closeMenu = closeMenu;
+
+            // Admin Access Logic (5 taps)
+            let tapCount = 0;
+            let tapTimer;
+            document.getElementById('logoTrigger').addEventListener('click', (e) => {
+                // Prevent nav click if tapping fast
+                tapCount++;
+                clearTimeout(tapTimer);
+                tapTimer = setTimeout(() => tapCount = 0, 2000);
+                if (tapCount === 5) {
+                    tapCount = 0;
+                    if(state.user) openAdminPanel();
+                    else document.getElementById('loginModal').showModal();
+                }
+            });
+
+            // Initial Load
+            try {
+                await loadData();
+                setupRealtime();
+                setupAuth();
+            } catch (err) {
+                console.error(err);
+                showToast('Error connecting to database. Please refresh.', 'error');
+            } finally {
+                document.getElementById('loader').classList.add('hidden');
+            }
+        });
+
+        // --- SUPABASE DATA LOGIC ---
+        async function loadData() {
+            // 1. Settings
+            let { data: set } = await sb.from('settings').select('*').single();
+            if(set) {
+                state.settings = set;
+                applySettings();
+            }
+
+            // 2. Content
+            let { data: content } = await sb.from('site_content').select('*');
+            if(content) {
+                content.forEach(item => state.content[item.key] = item.content);
+                applyContent();
+            }
+
+            // 3. Lists
+            let { data: fac } = await sb.from('facilities').select('*').order('id');
+            state.facilities = fac || [];
+            renderFacilities();
+
+            let { data: str } = await sb.from('streams').select('*').order('id');
+            state.streams = str || [];
+            renderStreams();
+
+            let { data: ev } = await sb.from('events').select('*').order('created_at', { ascending: false });
+            state.events = ev || [];
+            renderEvents();
+
+            let { data: gal } = await sb.from('gallery').select('*').order('created_at', { ascending: false });
+            state.gallery = gal || [];
+            renderGallery();
+        }
+
+        function setupRealtime() {
+            sb.channel('public_db')
+            .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
+                console.log('Change received!', payload);
+                // Simple strategy: Reload all data on any change to ensure consistency
+                // In a larger app, we'd merge payload.new
+                loadData(); 
+            })
+            .subscribe();
+        }
+
+        // --- AUTH & ADMIN ---
+        async function setupAuth() {
+            const { data: { session } } = await sb.auth.getSession();
+            state.user = session?.user;
+
+            sb.auth.onAuthStateChange((_event, session) => {
+                state.user = session?.user;
+                if (!state.user) {
+                    document.getElementById('adminPanel').classList.remove('active');
+                } else {
+                    showToast('Admin Logged In', 'success');
+                }
+            });
+
+            // Attempt to create default admin (will fail silently if exists or restricted)
+            // Note: Client-side creation is insecure in production without strict email restrictions, 
+            // but requested for this single-file solution.
+            // Using a specific setup function invoked manually in console or just relying on pre-created users 
+            // is better. For this demo, we assume the user sets it up or we catch the error.
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+            const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+            if (error) {
+                // Try signup if login fails (First run helper)
+                if(email === 'admin@school.com' && pass === 'admin123') {
+                     const { error: upErr } = await sb.auth.signUp({ email, password: pass });
+                     if(!upErr) {
+                         showToast('Admin account created! Logging in...', 'success');
+                         await sb.auth.signInWithPassword({ email, password: pass });
+                         document.getElementById('loginModal').close();
+                         openAdminPanel();
+                         return;
+                     }
+                }
+                showToast(error.message, 'error');
+            } else {
+                document.getElementById('loginModal').close();
+                openAdminPanel();
+            }
+        }
+
+        async function logout() {
+            await sb.auth.signOut();
+            document.getElementById('adminPanel').classList.remove('active');
+        }
+
+        function openAdminPanel() {
+            document.getElementById('adminPanel').classList.add('active');
+            populateAdminForms();
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminPanel').classList.remove('active');
+        }
+
+        window.showAdminSection = (id) => {
+            document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+            if(id === 'enquiries_admin') loadEnquiries();
+        };
+
+        // --- RENDERING ---
+        function applySettings() {
+            const s = state.settings;
+            if(s.school_name) {
+                document.title = s.school_name;
+                document.getElementById('navSchoolName').innerText = s.school_name;
+                document.getElementById('heroTitle').innerText = s.school_name;
+                document.getElementById('footerSchoolName').innerText = s.school_name;
+                document.getElementById('setSchoolName').value = s.school_name;
+            }
+            if(s.tagline) {
+                document.getElementById('heroTagline').innerText = s.tagline;
+                document.getElementById('footerTagline').innerText = s.tagline;
+                document.getElementById('setTagline').value = s.tagline;
+            }
+            if(s.logo_url) {
+                document.getElementById('navLogo').src = s.logo_url;
+            }
+            if(s.hero_bg_url) {
+                document.getElementById('home').style.backgroundImage = `url('${s.hero_bg_url}')`;
+            }
+            if(s.address) {
+                document.getElementById('contactAddress').innerText = s.address;
+                document.getElementById('setAddress').value = s.address;
+            }
+            if(s.phone) {
+                document.getElementById('contactPhone').innerText = s.phone;
+                document.getElementById('setPhone').value = s.phone;
+            }
+            if(s.email) {
+                document.getElementById('contactEmail').innerText = s.email;
+                document.getElementById('setEmail').value = s.email;
+            }
+            
+            // *** MAP FIX ***
+            // Use provided URL or fallback to Loni, Ghaziabad default map
+            const defaultMap = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d27993.42142279183!2d77.26871542898733!3d28.749471676839356!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cf8762725e227%3A0xc3fc62529247d63a!2sLoni%2C%20Ghaziabad%2C%20Uttar%20Pradesh!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin";
+            const mapSrc = s.map_url || defaultMap;
+            
+            document.getElementById('mapContainer').innerHTML = `<iframe src="${mapSrc}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+            
+            if(s.map_url) {
+                document.getElementById('setMap').value = s.map_url;
+            }
+        }
+
+        function applyContent() {
+            const c = state.content;
+            if(c.about_text) {
+                document.getElementById('aboutText').innerHTML = c.about_text;
+                document.getElementById('setContentAbout').value = c.about_text;
+            }
+            if(c.principal_msg) {
+                document.getElementById('principalMsg').innerHTML = c.principal_msg;
+                document.getElementById('setContentPrincipal').value = c.principal_msg;
+            }
+            if(c.admissions_info) {
+                document.getElementById('admissionsText').innerHTML = c.admissions_info;
+                document.getElementById('setContentAdmission').value = c.admissions_info;
+            }
+        }
+
+        function renderStreams() {
+            const container = document.getElementById('streamsGrid');
+            const adminContainer = document.getElementById('adminStreamsList');
+            container.innerHTML = state.streams.map(s => `
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="${s.icon_class} card-icon"></i>
+                        <h3 class="card-title">${s.title}</h3>
+                        <p class="card-text">${s.description}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Admin List
+            adminContainer.innerHTML = state.streams.map(s => `
+                <div style="background:#fff; padding:10px; margin-bottom:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>${s.title}</span>
+                    <div>
+                        <button class="action-btn btn-secondary" onclick="editItem('streams', ${s.id})">Edit</button>
+                        <button class="action-btn btn-danger" onclick="deleteItem('streams', ${s.id})">Del</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderFacilities() {
+            const container = document.getElementById('facilitiesGrid');
+            const adminContainer = document.getElementById('adminFacilitiesList');
+            container.innerHTML = state.facilities.map(f => `
+                <div class="card">
+                    ${f.image_url ? `<img src="${f.image_url}" class="card-img">` : ''}
+                    <div class="card-body">
+                        <div class="flex-center" style="justify-content:flex-start; gap:10px; margin-bottom:10px;">
+                            <i class="${f.icon_class}" style="color:var(--secondary); font-size:1.2rem;"></i>
+                            <h3 class="card-title" style="margin:0;">${f.name}</h3>
+                        </div>
+                        <p class="card-text">${f.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+             adminContainer.innerHTML = state.facilities.map(f => `
+                <div style="background:#fff; padding:10px; margin-bottom:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>${f.name}</span>
+                    <div>
+                        <button class="action-btn btn-secondary" onclick="editItem('facilities', ${f.id})">Edit</button>
+                        <button class="action-btn btn-danger" onclick="deleteItem('facilities', ${f.id})">Del</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderEvents() {
+            const container = document.getElementById('eventsGrid');
+            const adminContainer = document.getElementById('adminEventsList');
+            container.innerHTML = state.events.map(e => `
+                <div class="card">
+                    ${e.image_url ? `<img src="${e.image_url}" class="card-img">` : ''}
+                    <div class="card-body">
+                        <div class="date-badge">${new Date(e.event_date).toLocaleDateString()}</div>
+                        <h3 class="card-title">${e.title}</h3>
+                        <p class="card-text">${e.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            adminContainer.innerHTML = state.events.map(e => `
+                <div style="background:#fff; padding:10px; margin-bottom:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>${e.title} (${e.event_date})</span>
+                    <div>
+                        <button class="action-btn btn-secondary" onclick="editItem('events', ${e.id})">Edit</button>
+                        <button class="action-btn btn-danger" onclick="deleteItem('events', ${e.id})">Del</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderGallery() {
+            const container = document.getElementById('galleryGrid');
+            const adminContainer = document.getElementById('adminGalleryList');
+            const html = state.gallery.map(g => `
+                <div class="gallery-item">
+                    <img src="${g.image_url}" loading="lazy">
+                    <div class="gallery-caption">${g.caption || ''}</div>
+                </div>
+            `).join('');
+            container.innerHTML = html;
+            
+            adminContainer.innerHTML = state.gallery.map(g => `
+                <div class="gallery-item" style="aspect-ratio:1;">
+                    <img src="${g.image_url}">
+                    <button onclick="deleteItem('gallery', ${g.id})" style="position:absolute; top:5px; right:5px; background:red; color:white; border-radius:50%; width:25px; height:25px; padding:0; z-index:2;">&times;</button>
+                </div>
+            `).join('');
+        }
+
+        async function loadEnquiries() {
+            const { data } = await sb.from('enquiries').select('*').order('created_at', {ascending: false});
+            state.enquiries = data || [];
+            document.querySelector('#enquiryTable tbody').innerHTML = state.enquiries.map(e => `
+                <tr>
+                    <td>${new Date(e.created_at).toLocaleDateString()}</td>
+                    <td>${e.name}</td>
+                    <td>${e.phone}</td>
+                    <td>${e.student_class}</td>
+                    <td>${e.message}</td>
+                </tr>
+            `).join('');
+        }
+
+        // --- ADMIN ACTIONS ---
+        function populateAdminForms() {
+            // Already handled in applySettings/Content, but ensuring re-bind
+        }
+
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const updates = {
+                school_name: document.getElementById('setSchoolName').value,
+                tagline: document.getElementById('setTagline').value,
+                address: document.getElementById('setAddress').value,
+                phone: document.getElementById('setPhone').value,
+                email: document.getElementById('setEmail').value,
+                map_url: document.getElementById('setMap').value
+            };
+            const { error } = await sb.from('settings').update(updates).eq('id', 1);
+            if(error) showToast('Error saving settings', 'error');
+            else showToast('Settings saved', 'success');
+        });
+
+        document.getElementById('contentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const upsert = async (key, val) => {
+                await sb.from('site_content').upsert({ key, content: val });
+            };
+            await upsert('about_text', document.getElementById('setContentAbout').value);
+            await upsert('principal_msg', document.getElementById('setContentPrincipal').value);
+            await upsert('admissions_info', document.getElementById('setContentAdmission').value);
+            showToast('Content updated', 'success');
+        });
+
+        // Add/Edit Item Logic
+        window.addItem = (table) => {
+            currentEditingId = null;
+            openEditModal(table);
+        };
+
+        window.editItem = (table, id) => {
+            currentEditingId = id;
+            openEditModal(table);
+        };
+
+        async function deleteItem(table, id) {
+            if(!confirm('Are you sure?')) return;
+            const { error } = await sb.from(table).delete().eq('id', id);
+            if(error) showToast('Delete failed', 'error');
+            else showToast('Item deleted', 'success');
+        }
+
+        function openEditModal(table) {
+            const modal = document.getElementById('editModal');
+            const body = document.getElementById('editModalBody');
+            const title = document.getElementById('editModalTitle');
+            const saveBtn = document.getElementById('saveEditBtn');
+            
+            title.innerText = (currentEditingId ? 'Edit ' : 'Add ') + table;
+            
+            // Build Form based on table
+            let item = currentEditingId ? state[table].find(i => i.id === currentEditingId) : {};
+            let html = '';
+
+            if(table === 'streams') {
+                html = `
+                    <div class="form-group"><label>Title</label><input class="form-control" id="inpTitle" value="${item.title||''}"></div>
+                    <div class="form-group"><label>Description</label><textarea class="form-control" id="inpDesc">${item.description||''}</textarea></div>
+                    <div class="form-group"><label>Icon (FontAwesome)</label><input class="form-control" id="inpIcon" value="${item.icon_class||'fa-solid fa-book'}"></div>
+                `;
+            } else if (table === 'facilities') {
+                html = `
+                    <div class="form-group"><label>Name</label><input class="form-control" id="inpName" value="${item.name||''}"></div>
+                    <div class="form-group"><label>Description</label><textarea class="form-control" id="inpDesc">${item.description||''}</textarea></div>
+                    <div class="form-group"><label>Image</label><button class="btn btn-secondary" onclick="triggerUpload('facilities', 4/3)">Upload Image</button><input type="hidden" id="inpImg" value="${item.image_url||''}"></div>
+                `;
+            } else if (table === 'events') {
+                html = `
+                    <div class="form-group"><label>Title</label><input class="form-control" id="inpTitle" value="${item.title||''}"></div>
+                    <div class="form-group"><label>Date</label><input type="date" class="form-control" id="inpDate" value="${item.event_date||''}"></div>
+                    <div class="form-group"><label>Description</label><textarea class="form-control" id="inpDesc">${item.description||''}</textarea></div>
+                    <div class="form-group"><label>Image</label><button class="btn btn-secondary" onclick="triggerUpload('events', 16/9)">Upload Image</button><input type="hidden" id="inpImg" value="${item.image_url||''}"></div>
+                `;
+            }
+
+            body.innerHTML = html;
+            
+            // Override save handler
+            saveBtn.onclick = async () => {
+                let data = {};
+                if(table === 'streams') {
+                    data = { title: document.getElementById('inpTitle').value, description: document.getElementById('inpDesc').value, icon_class: document.getElementById('inpIcon').value };
+                } else if(table === 'facilities') {
+                    data = { name: document.getElementById('inpName').value, description: document.getElementById('inpDesc').value, image_url: document.getElementById('inpImg').value };
+                } else if(table === 'events') {
+                    data = { title: document.getElementById('inpTitle').value, event_date: document.getElementById('inpDate').value, description: document.getElementById('inpDesc').value, image_url: document.getElementById('inpImg').value };
+                }
+
+                let p;
+                if(currentEditingId) p = sb.from(table).update(data).eq('id', currentEditingId);
+                else p = sb.from(table).insert(data);
+                
+                const { error } = await p;
+                if(error) showToast(error.message, 'error');
+                else {
+                    showToast('Saved!', 'success');
+                    modal.close();
+                }
+            };
+
+            modal.showModal();
+        }
+
+        // --- IMAGE CROP & UPLOAD ---
+        const fileInput = document.getElementById('fileInput');
+        window.triggerUpload = (type, ratio) => {
+            currentUploadType = type;
+            fileInput.setAttribute('data-ratio', ratio);
+            fileInput.click();
+        };
+
+        fileInput.addEventListener('change', (e) => {
+            if(e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    document.getElementById('cropImageSrc').src = evt.target.result;
+                    const modal = document.getElementById('cropModal');
+                    modal.showModal();
+                    
+                    if(cropper) cropper.destroy();
+                    const ratio = parseFloat(fileInput.getAttribute('data-ratio'));
+                    cropper = new Cropper(document.getElementById('cropImageSrc'), {
+                        aspectRatio: isNaN(ratio) ? NaN : ratio,
+                        viewMode: 1
+                    });
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+            fileInput.value = '';
+        });
+
+        window.saveCrop = () => {
+            if(!cropper) return;
+            const canvas = cropper.getCroppedCanvas();
+            canvas.toBlob(async (blob) => {
+                showToast('Uploading...', 'success'); // Using success style for info
+                const fileName = `${Date.now()}.jpg`;
+                const { data, error } = await sb.storage.from('images').upload(fileName, blob);
+                
+                if(error) {
+                    showToast('Upload failed', 'error');
+                    return;
+                }
+
+                const { data: { publicUrl } } = sb.storage.from('images').getPublicUrl(fileName);
+                document.getElementById('cropModal').close();
+
+                // Handle Post-Upload Logic
+                if(currentUploadType === 'logo') {
+                    await sb.from('settings').update({ logo_url: publicUrl }).eq('id', 1);
+                } else if(currentUploadType === 'hero') {
+                    await sb.from('settings').update({ hero_bg_url: publicUrl }).eq('id', 1);
+                } else if(currentUploadType === 'gallery') {
+                    const caption = prompt('Enter caption for gallery image:');
+                    await sb.from('gallery').insert({ image_url: publicUrl, caption: caption });
+                } else if(currentUploadType === 'facilities' || currentUploadType === 'events') {
+                    // Update the hidden input in the edit modal
+                    const inp = document.getElementById('inpImg');
+                    if(inp) inp.value = publicUrl;
+                }
+                showToast('Image uploaded successfully', 'success');
+            }, 'image/jpeg', 0.8);
+        };
+
+        window.closeModal = (id) => document.getElementById(id).close();
+
+        // --- PUBLIC FORMS ---
+        document.getElementById('enquiryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('enqName').value,
+                phone: document.getElementById('enqPhone').value,
+                student_class: document.getElementById('enqClass').value,
+                message: document.getElementById('enqMsg').value
+            };
+            const { error } = await sb.from('enquiries').insert(data);
+            if(error) showToast('Could not send enquiry. Try again.', 'error');
+            else {
+                showToast('Enquiry sent successfully!', 'success');
+                e.target.reset();
+            }
+        });
+
+        // --- UTILS ---
+        function showToast(msg, type) {
+            const el = document.createElement('div');
+            el.className = `toast ${type}`;
+            el.innerHTML = type === 'success' ? `<i class="fas fa-check-circle"></i> ${msg}` : `<i class="fas fa-exclamation-triangle"></i> ${msg}`;
+            document.getElementById('toastContainer').appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
+
+        window.exportCSV = () => {
+            let csvContent = "data:text/csv;charset=utf-8,Date,Name,Phone,Class,Message\n";
+            state.enquiries.forEach(row => {
+                csvContent += `${row.created_at},${row.name},${row.phone},${row.student_class},"${row.message.replace(/,/g, ' ')}"\n`;
+            });
+            const link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", "enquiries.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+    </script>
+</body>
+</html>
